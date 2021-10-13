@@ -3,6 +3,7 @@
         <div class="row">
           <div class="col-md-8">
               <img src="https://vattuphu3ds.com/userfiles/bulong-740x431.jpg">
+              <img v-if="url" :src="urlImg" />
           </div>
           <div class="col-md-4">
             <label>File
@@ -30,7 +31,8 @@ export default {
       width: 500,
       height: 500,
       predictions: [],
-      url: "http://localhost:3000/1634006281812.png"
+      url: "https://vattuphu3ds.com/userfiles/bulong-740x431.jpg",
+      urlImg: ''
     }
   },
   created() {
@@ -38,19 +40,26 @@ export default {
   methods: {
     handleFileUpload(e) {
       this.file = e.target.files[0]
-      console.log(this.file)
+      this.urlImg = URL.createObjectURL(this.file);
+      console.log(this.urlImg)
+      
     },
     submitFile(){
       let formData = new FormData();
       formData.append('photo', this.file);
       const config = {
-          headers: { 'content-type': 'multipart/form-data' }
+          headers: { 
+            'content-type': 'multipart/form-data',
+            "Access-Control-Allow-Origin": "*"
+          }
       }
-      axios.post('http://10.1.41.159:3000/predict', formData, config)
+      axios.post('http://localhost:3000/predict', formData, config)
       .then(response => {
         console.log(response);
         this.predictions = response.data.predictions
-        this.url = response.data.url
+        // this.url = response.data.url
+        console.log(response.data.url)
+        console.log(this.url)
         this.makeCanvas()
       })
 
@@ -59,21 +68,16 @@ export default {
         console.log(12233);
         var canvas = document.getElementById('canvas1');
         var context = canvas.getContext('2d');
-        console.log(1);
-
         context.clearRect(0, 0, canvas.width, canvas.height);
-        console.log(2);
-
-        console.log(3);
 
         var img = new Image();
-        console.log(12233);
         canvas.width = this.width;
         canvas.height = this.height;
-        img.src = 'https://vattuphu3ds.com/userfiles/bulong-740x431.jpg';
+        
+        img.src = this.urlImg;
+        console.log(img);
+        
         context.drawImage(img, 0, 0, this.width, this.height);
-        console.log(this.predictions);
-        console.log(12233);
         
         for (let n = 0; n < this.predictions.length; n++) {
           const predict = this.predictions[n]
